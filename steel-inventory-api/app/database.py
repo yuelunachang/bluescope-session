@@ -2,6 +2,7 @@ from typing import List, Optional
 from app.models import SteelProduct
 from datetime import datetime
 
+
 # Simple in-memory database for the lab
 # In production, this would use SQLAlchemy with a real database
 class InMemoryDB:
@@ -9,7 +10,7 @@ class InMemoryDB:
         self.products: List[SteelProduct] = []
         self._next_id = 1
         self._seed_data()
-    
+
     def _seed_data(self):
         """Add some initial data"""
         sample_products = [
@@ -23,7 +24,7 @@ class InMemoryDB:
                 thickness_mm=6.0,
                 quantity=150,
                 location="Warehouse-A",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=2,
@@ -35,7 +36,7 @@ class InMemoryDB:
                 thickness_mm=3.0,
                 quantity=75,
                 location="Warehouse-B",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=3,
@@ -47,7 +48,7 @@ class InMemoryDB:
                 thickness_mm=10.0,
                 quantity=50,
                 location="Warehouse-B",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=4,
@@ -59,7 +60,7 @@ class InMemoryDB:
                 thickness_mm=50.0,
                 quantity=200,
                 location="Warehouse-C",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=5,
@@ -71,7 +72,7 @@ class InMemoryDB:
                 thickness_mm=5.0,
                 quantity=120,
                 location="Warehouse-C",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=6,
@@ -83,7 +84,7 @@ class InMemoryDB:
                 thickness_mm=4.0,
                 quantity=180,
                 location="Warehouse-A",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=7,
@@ -95,7 +96,7 @@ class InMemoryDB:
                 thickness_mm=12.0,
                 quantity=45,
                 location="Warehouse-A",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=8,
@@ -107,7 +108,7 @@ class InMemoryDB:
                 thickness_mm=2.5,
                 quantity=60,
                 location="Warehouse-B",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=9,
@@ -119,7 +120,7 @@ class InMemoryDB:
                 thickness_mm=40.0,
                 quantity=150,
                 location="Warehouse-C",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
             SteelProduct(
                 id=10,
@@ -131,32 +132,41 @@ class InMemoryDB:
                 thickness_mm=6.0,
                 quantity=90,
                 location="Warehouse-C",
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             ),
         ]
         self.products = sample_products
         self._next_id = 11
-    
+
     def get_all(self) -> List[SteelProduct]:
         return self.products
-    
+
+    def get_by_grade(self, grade: str) -> List[SteelProduct]:
+        return [p for p in self.products if p.grade.upper() == grade.upper()]
+
+    def get_low_stock(self) -> List[SteelProduct]:
+        return [p for p in self.products if p.quantity < p.min_stock_level]
+
     def get_by_id(self, product_id: int) -> Optional[SteelProduct]:
         for product in self.products:
             if product.id == product_id:
                 return product
         return None
-    
+
+    def get_by_code(self, product_code: str) -> Optional[SteelProduct]:
+        for product in self.products:
+            if product.product_code == product_code:
+                return product
+        return None
+
     def create(self, product_data: dict) -> SteelProduct:
-        # BUG: Missing validation for duplicate product codes
-        product = SteelProduct(
-            id=self._next_id,
-            **product_data,
-            last_updated=datetime.now()
-        )
+        if self.get_by_code(product_data["product_code"]):
+            raise ValueError(f"Product code '{product_data['product_code']}' already exists")
+        product = SteelProduct(id=self._next_id, **product_data, last_updated=datetime.now())
         self.products.append(product)
         self._next_id += 1
         return product
-    
+
     def update(self, product_id: int, update_data: dict) -> Optional[SteelProduct]:
         product = self.get_by_id(product_id)
         if product:
@@ -166,7 +176,7 @@ class InMemoryDB:
                     setattr(product, key, value)
             return product
         return None
-    
+
     def delete(self, product_id: int) -> bool:
         # BUG: Missing proper deletion logic
         product = self.get_by_id(product_id)
@@ -174,6 +184,7 @@ class InMemoryDB:
             self.products.remove(product)
             return True
         return False
+
 
 # Global database instance
 db = InMemoryDB()
