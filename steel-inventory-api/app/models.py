@@ -14,6 +14,8 @@ class SteelProduct(BaseModel):
     width_mm: Optional[float] = Field(None, gt=0)
     thickness_mm: float = Field(..., gt=0)
     quantity: int = Field(..., ge=0)
+    min_stock_level: int = Field(default=0, ge=0)
+    alert_sent: bool = False
     location: str
     last_updated: Optional[datetime] = None
 
@@ -27,6 +29,7 @@ class SteelProduct(BaseModel):
                 "width_mm": 1200,
                 "thickness_mm": 6.0,
                 "quantity": 150,
+                "min_stock_level": 50,
                 "location": "Warehouse-A",
             }
         }
@@ -40,12 +43,15 @@ class SteelProductCreate(BaseModel):
     width_mm: Optional[float] = Field(None, gt=0)
     thickness_mm: float = Field(..., gt=0)
     quantity: int = Field(..., ge=0)
+    min_stock_level: int = Field(default=0, ge=0)
     location: str
 
 
 class SteelProductUpdate(BaseModel):
     quantity: Optional[int] = Field(None, ge=0)
     location: Optional[str] = Field(None, min_length=1)
+    min_stock_level: Optional[int] = Field(None, ge=0)
+    alert_sent: Optional[bool] = None
 
 
 # TODO: Add models for batch tracking, quality inspections

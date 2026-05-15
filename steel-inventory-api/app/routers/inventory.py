@@ -14,6 +14,12 @@ async def get_all_products(grade: Optional[str] = None):
     return db.get_all()
 
 
+@router.get("/low-stock", response_model=List[SteelProduct])
+async def get_low_stock_products():
+    """Get all products whose quantity is below their minimum stock level"""
+    return db.get_low_stock()
+
+
 @router.get("/{product_id}", response_model=SteelProduct)
 async def get_product(product_id: int):
     """Get a specific product by ID"""
