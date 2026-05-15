@@ -139,7 +139,10 @@ class InMemoryDB:
     
     def get_all(self) -> List[SteelProduct]:
         return self.products
-    
+
+    def get_by_grade(self, grade: str) -> List[SteelProduct]:
+        return [p for p in self.products if p.grade.upper() == grade.upper()]
+
     def get_by_id(self, product_id: int) -> Optional[SteelProduct]:
         for product in self.products:
             if product.id == product_id:
