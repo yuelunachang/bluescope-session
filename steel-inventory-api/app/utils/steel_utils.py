@@ -37,7 +37,8 @@ def validate_grade(grade: str) -> bool:
 
 def calculate_area_m2(length_mm: float, width_mm: Optional[float]) -> float:
     """Calculate surface area in square meters"""
-    # BUG: Missing validation for None width
+    if width_mm is None:
+        raise ValueError("Width required to calculate area")
     area_mm2 = length_mm * width_mm
     area_m2 = area_mm2 / 1_000_000
     return round(area_m2, 2)

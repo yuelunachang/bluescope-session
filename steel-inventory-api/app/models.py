@@ -2,8 +2,10 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from datetime import datetime
 
+
 class SteelProduct(BaseModel):
     """Model for steel product in inventory"""
+
     id: Optional[int] = None
     product_code: str = Field(..., min_length=3, max_length=20)
     grade: str  # e.g., "A36", "304", "4140"
@@ -25,22 +27,25 @@ class SteelProduct(BaseModel):
                 "width_mm": 1200,
                 "thickness_mm": 6.0,
                 "quantity": 150,
-                "location": "Warehouse-A"
+                "location": "Warehouse-A",
             }
         }
 
+
 class SteelProductCreate(BaseModel):
-    product_code: str
+    product_code: str = Field(..., min_length=3, max_length=20)
     grade: str
     shape: Literal["sheet", "coil", "plate", "bar", "tube"]
-    length_mm: float
-    width_mm: Optional[float] = None
-    thickness_mm: float
-    quantity: int
+    length_mm: float = Field(..., gt=0)
+    width_mm: Optional[float] = Field(None, gt=0)
+    thickness_mm: float = Field(..., gt=0)
+    quantity: int = Field(..., ge=0)
     location: str
 
+
 class SteelProductUpdate(BaseModel):
-    quantity: Optional[int] = None
-    location: Optional[str] = None
-    
+    quantity: Optional[int] = Field(None, ge=0)
+    location: Optional[str] = Field(None, min_length=1)
+
+
 # TODO: Add models for batch tracking, quality inspections

@@ -145,9 +145,16 @@ class InMemoryDB:
             if product.id == product_id:
                 return product
         return None
+
+    def get_by_code(self, product_code: str) -> Optional[SteelProduct]:
+        for product in self.products:
+            if product.product_code == product_code:
+                return product
+        return None
     
     def create(self, product_data: dict) -> SteelProduct:
-        # BUG: Missing validation for duplicate product codes
+        if self.get_by_code(product_data["product_code"]):
+            raise ValueError(f"Product code '{product_data['product_code']}' already exists")
         product = SteelProduct(
             id=self._next_id,
             **product_data,

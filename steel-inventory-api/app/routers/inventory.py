@@ -29,12 +29,14 @@ async def create_product(product: SteelProductCreate):
     """Create a new product in inventory"""
     # TODO: Add validation using steel_utils
     product_dict = product.model_dump()
-    return db.create(product_dict)
+    try:
+        return db.create(product_dict)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
 
 @router.patch("/{product_id}", response_model=SteelProduct)
 async def update_product(product_id: int, update: SteelProductUpdate):
     """Update product quantity or location"""
-    # BUG: No validation for negative quantities
     update_data = update.model_dump(exclude_unset=True)
     product = db.update(product_id, update_data)
     if not product:
