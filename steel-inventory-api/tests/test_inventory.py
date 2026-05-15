@@ -5,10 +5,12 @@ from app.database import db
 
 client = TestClient(app)
 
+
 def test_root_endpoint():
     """Test the root endpoint returns 200"""
     response = client.get("/")
     assert response.status_code == 200
+
 
 def test_get_all_products():
     """Test getting all products"""
@@ -27,7 +29,7 @@ def setup_test_products():
     # Clear database
     db.products = []
     db._next_id = 1
-    
+
     # Create test products with different grades
     test_products = [
         {
@@ -38,7 +40,7 @@ def setup_test_products():
             "width_mm": 1200,
             "thickness_mm": 6.0,
             "quantity": 100,
-            "location": "Warehouse-A"
+            "location": "Warehouse-A",
         },
         {
             "product_code": "STL-A36-002",
@@ -48,7 +50,7 @@ def setup_test_products():
             "width_mm": 1500,
             "thickness_mm": 10.0,
             "quantity": 50,
-            "location": "Warehouse-B"
+            "location": "Warehouse-B",
         },
         {
             "product_code": "STL-304-001",
@@ -57,7 +59,7 @@ def setup_test_products():
             "length_mm": 5000,
             "thickness_mm": 2.0,
             "quantity": 200,
-            "location": "Warehouse-A"
+            "location": "Warehouse-A",
         },
         {
             "product_code": "STL-4140-001",
@@ -66,15 +68,15 @@ def setup_test_products():
             "length_mm": 6000,
             "thickness_mm": 25.0,
             "quantity": 75,
-            "location": "Warehouse-C"
-        }
+            "location": "Warehouse-C",
+        },
     ]
-    
+
     for product_data in test_products:
         db.create(product_data)
-    
+
     yield
-    
+
     # Cleanup after tests
     db.products = []
     db._next_id = 1
@@ -83,7 +85,7 @@ def setup_test_products():
 def test_search_by_grade_existing_single_result(setup_test_products):
     """Test searching for a grade that exists with single result"""
     response = client.get("/inventory/?grade=304")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
@@ -95,16 +97,16 @@ def test_search_by_grade_existing_single_result(setup_test_products):
 def test_search_by_grade_existing_multiple_results(setup_test_products):
     """Test searching for a grade that exists with multiple results"""
     response = client.get("/inventory/?grade=A36")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
     assert len(results) == 2
-    
+
     # Verify all results match the search grade
     for product in results:
         assert product["grade"] == "A36"
-    
+
     # Verify we got the expected products
     product_codes = [p["product_code"] for p in results]
     assert "STL-A36-001" in product_codes
@@ -114,7 +116,7 @@ def test_search_by_grade_existing_multiple_results(setup_test_products):
 def test_search_by_grade_non_existent(setup_test_products):
     """Test searching for a grade that doesn't exist returns empty list"""
     response = client.get("/inventory/?grade=9999")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
@@ -124,12 +126,12 @@ def test_search_by_grade_non_existent(setup_test_products):
 def test_search_by_grade_case_insensitive_lowercase(setup_test_products):
     """Test searching for grade is case-insensitive (lowercase input)"""
     response = client.get("/inventory/?grade=a36")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
     assert len(results) == 2
-    
+
     # Verify all results match A36 regardless of case
     for product in results:
         assert product["grade"].upper() == "A36"
@@ -138,16 +140,16 @@ def test_search_by_grade_case_insensitive_lowercase(setup_test_products):
 def test_search_by_grade_case_insensitive_mixed_case(setup_test_products):
     """Test searching for grade is case-insensitive (mixed case input)"""
     response = client.get("/inventory/?grade=a36")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 2
-    
+
     # Same test with different case
     response_upper = client.get("/inventory/?grade=A36")
     assert response_upper.status_code == 200
     results_upper = response_upper.json()
-    
+
     # Both searches should return the same results
     assert len(results) == len(results_upper)
     assert sorted([p["id"] for p in results]) == sorted([p["id"] for p in results_upper])
@@ -158,14 +160,14 @@ def test_search_by_grade_empty_database():
     # Clear database
     db.products = []
     db._next_id = 1
-    
+
     response = client.get("/inventory/?grade=A36")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
     assert len(results) == 0
-    
+
     # Cleanup
     db.products = []
     db._next_id = 1
@@ -174,7 +176,7 @@ def test_search_by_grade_empty_database():
 def test_search_by_grade_with_special_characters(setup_test_products):
     """Test searching for grade with numeric characters works correctly"""
     response = client.get("/inventory/?grade=4140")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 1
@@ -185,7 +187,7 @@ def test_search_by_grade_with_special_characters(setup_test_products):
 def test_get_all_products_without_grade_filter(setup_test_products):
     """Test that getting all products without grade filter still works"""
     response = client.get("/inventory/")
-    
+
     assert response.status_code == 200
     results = response.json()
     assert isinstance(results, list)
