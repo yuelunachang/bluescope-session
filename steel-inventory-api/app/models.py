@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field
 from typing import Optional, Literal
 from datetime import datetime
 
+QualityGrade = Literal["Premium", "Standard", "Economy"]
+
 class SteelProduct(BaseModel):
     """Model for steel product in inventory"""
     id: Optional[int] = None
@@ -13,6 +15,7 @@ class SteelProduct(BaseModel):
     thickness_mm: float = Field(..., gt=0)
     quantity: int = Field(..., ge=0)
     location: str
+    quality_grade: QualityGrade = "Standard"
     last_updated: Optional[datetime] = None
 
     class Config:
@@ -25,7 +28,8 @@ class SteelProduct(BaseModel):
                 "width_mm": 1200,
                 "thickness_mm": 6.0,
                 "quantity": 150,
-                "location": "Warehouse-A"
+                "location": "Warehouse-A",
+                "quality_grade": "Standard"
             }
         }
 
@@ -38,9 +42,11 @@ class SteelProductCreate(BaseModel):
     thickness_mm: float
     quantity: int
     location: str
+    quality_grade: QualityGrade = "Standard"
 
 class SteelProductUpdate(BaseModel):
     quantity: Optional[int] = None
     location: Optional[str] = None
+    quality_grade: Optional[QualityGrade] = None
     
 # TODO: Add models for batch tracking, quality inspections
