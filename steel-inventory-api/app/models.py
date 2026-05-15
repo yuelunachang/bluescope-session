@@ -4,8 +4,10 @@ from datetime import datetime
 
 QualityGrade = Literal["Premium", "Standard", "Economy"]
 
+
 class SteelProduct(BaseModel):
     """Model for steel product in inventory"""
+
     id: Optional[int] = None
     product_code: str = Field(..., min_length=3, max_length=20)
     grade: str  # e.g., "A36", "304", "4140"
@@ -29,9 +31,10 @@ class SteelProduct(BaseModel):
                 "thickness_mm": 6.0,
                 "quantity": 150,
                 "location": "Warehouse-A",
-                "quality_grade": "Standard"
+                "quality_grade": "Standard",
             }
         }
+
 
 class SteelProductCreate(BaseModel):
     product_code: str
@@ -44,9 +47,11 @@ class SteelProductCreate(BaseModel):
     location: str
     quality_grade: QualityGrade = "Standard"
 
+
 class SteelProductUpdate(BaseModel):
     quantity: Optional[int] = None
     location: Optional[str] = None
     quality_grade: Optional[QualityGrade] = None
-    
+
+
 # TODO: Add models for batch tracking, quality inspections
