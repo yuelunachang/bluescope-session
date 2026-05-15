@@ -23,6 +23,7 @@ VALID_SHAPES: tuple[str, ...] = ("sheet", "plate", "coil", "bar", "tube")
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _validate_positive(value: float, name: str) -> None:
     """Raise ValueError if *value* is not strictly positive.
 
@@ -58,6 +59,7 @@ def _validate_required(value: Optional[float], name: str) -> float:
 # ---------------------------------------------------------------------------
 # Private shape-specific weight calculators
 # ---------------------------------------------------------------------------
+
 
 def _weight_sheet_plate(length_mm: float, width_mm: float, thickness_mm: float) -> float:
     """Calculate weight of a rectangular flat product (sheet or plate).
@@ -109,7 +111,7 @@ def _weight_bar(length_mm: float, thickness_mm: float) -> float:
         Weight in kilograms, rounded to 2 decimal places.
     """
     radius_mm = thickness_mm / 2
-    volume_mm3 = math.pi * radius_mm ** 2 * length_mm
+    volume_mm3 = math.pi * radius_mm**2 * length_mm
     return round(volume_mm3 * STEEL_DENSITY_KG_MM3, 2)
 
 
@@ -140,13 +142,14 @@ def _weight_tube(length_mm: float, outer_diameter_mm: float, wall_thickness_mm: 
         )
     outer_radius = outer_diameter_mm / 2
     inner_radius = inner_diameter_mm / 2
-    volume_mm3 = math.pi * (outer_radius ** 2 - inner_radius ** 2) * length_mm
+    volume_mm3 = math.pi * (outer_radius**2 - inner_radius**2) * length_mm
     return round(volume_mm3 * STEEL_DENSITY_KG_MM3, 2)
 
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def calculate_weight_kg(
     length_mm: float,
