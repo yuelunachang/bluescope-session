@@ -1,14 +1,23 @@
 from typing import List, Optional
 from app.models import SteelProduct
 from datetime import datetime
+from app.config import DEFAULT_INVENTORY_THRESHOLD
 
 # Simple in-memory database for the lab
 # In production, this would use SQLAlchemy with a real database
 class InMemoryDB:
     def __init__(self):
-        self.products: List[SteelProduct] = []
+        self.reset()
+
+    def reset(self):
+        self.products = []
         self._next_id = 1
+        self.global_inventory_threshold = DEFAULT_INVENTORY_THRESHOLD
         self._seed_data()
+
+    def _apply_threshold(self, product: Optional[SteelProduct]) -> None:
+        if product:
+            product.set_global_inventory_threshold(self.global_inventory_threshold)
     
     def _seed_data(self):
         """Add some initial data"""
@@ -138,11 +147,14 @@ class InMemoryDB:
         self._next_id = 11
     
     def get_all(self) -> List[SteelProduct]:
+        for product in self.products:
+            self._apply_threshold(product)
         return self.products
     
     def get_by_id(self, product_id: int) -> Optional[SteelProduct]:
         for product in self.products:
             if product.id == product_id:
+                self._apply_threshold(product)
                 return product
         return None
     
@@ -153,6 +165,7 @@ class InMemoryDB:
             **product_data,
             last_updated=datetime.now()
         )
+        self._apply_threshold(product)
         self.products.append(product)
         self._next_id += 1
         return product
@@ -160,10 +173,14 @@ class InMemoryDB:
     def update(self, product_id: int, update_data: dict) -> Optional[SteelProduct]:
         product = self.get_by_id(product_id)
         if product:
-            # BUG: Not updating last_updated timestamp
+            changed = False
             for key, value in update_data.items():
-                if value is not None:
+                if (value is not None or key == "inventory_threshold") and getattr(product, key) != value:
                     setattr(product, key, value)
+                    changed = True
+            if changed:
+                product.last_updated = datetime.now()
+            self._apply_threshold(product)
             return product
         return None
     
@@ -174,6 +191,10 @@ class InMemoryDB:
             self.products.remove(product)
             return True
         return False
+
+    def set_global_inventory_threshold(self, threshold: int) -> int:
+        self.global_inventory_threshold = threshold
+        return self.global_inventory_threshold
 
 # Global database instance
 db = InMemoryDB()

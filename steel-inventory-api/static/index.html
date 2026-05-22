@@ -52,6 +52,13 @@
                     <div class="stat-label">Steel Grades</div>
                 </div>
             </div>
+            <div class="stat-card low-stock-stat">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="lowStockCount">0</div>
+                    <div class="stat-label">Low Stock Items</div>
+                </div>
+            </div>
         </div>
 
         <div class="filters">
@@ -70,6 +77,9 @@
                 <option value="Warehouse-B">Warehouse-B</option>
                 <option value="Warehouse-C">Warehouse-C</option>
             </select>
+            <button id="lowStockFilter" class="btn btn-secondary btn-sm" onclick="toggleLowStockFilter()">
+                ⚠ Low Stock Only
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear Filters</button>
         </div>
 

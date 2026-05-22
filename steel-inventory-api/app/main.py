@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import inventory, calculations
+from app.routers import calculations, config, inventory
 import os
 
 app = FastAPI(
@@ -21,6 +21,8 @@ app.add_middleware(
 # Include routers
 app.include_router(inventory.router)
 app.include_router(calculations.router)
+app.include_router(config.router)
+app.include_router(config.api_router)
 
 # Mount static files for frontend
 static_path = os.path.join(os.path.dirname(__file__), "..", "static")
@@ -29,10 +31,15 @@ if os.path.exists(static_path):
 
 
 @app.get("/")
-async def root():
+async def root(request: Request):
     """Serve the frontend web application"""
     static_path = os.path.join(os.path.dirname(__file__), "..", "static", "index.html")
-    if os.path.exists(static_path):
+    accepted_media_types = [
+        value.split(";", 1)[0].strip()
+        for value in request.headers.get("accept", "").split(",")
+        if value.strip()
+    ]
+    if os.path.exists(static_path) and "text/html" in accepted_media_types:
         return FileResponse(static_path)
     return {"message": "Welcome to BlueScope Steel Inventory API", "docs": "/docs", "version": "0.1.0"}
 

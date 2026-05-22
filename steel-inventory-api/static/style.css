@@ -213,6 +213,14 @@ header {
     justify-content: space-between;
     align-items: start;
     margin-bottom: 15px;
+    gap: 12px;
+}
+
+.product-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .product-code {
@@ -234,6 +242,14 @@ header {
 .badge-plate { background: #e8f5e9; color: #388e3c; }
 .badge-bar { background: #fff3e0; color: #f57c00; }
 .badge-tube { background: #fce4ec; color: #c2185b; }
+
+.low-stock-badge {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+}
 
 .product-details {
     margin: 15px 0;
@@ -266,6 +282,20 @@ header {
 .quantity-high { background: #d4edda; color: #155724; }
 .quantity-medium { background: #fff3cd; color: #856404; }
 .quantity-low { background: #f8d7da; color: #721c24; }
+
+#lowStockFilter.active {
+    background: #dc2626;
+    color: #fff;
+}
+
+.stat-card.low-stock-stat {
+    border: 2px solid #fca5a5;
+}
+
+.stat-card.low-stock-stat .stat-icon,
+.stat-card.low-stock-stat .stat-value {
+    color: #dc2626;
+}
 
 .product-actions {
     display: flex;
