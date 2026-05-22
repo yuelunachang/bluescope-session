@@ -173,11 +173,14 @@ class InMemoryDB:
     def update(self, product_id: int, update_data: dict) -> Optional[SteelProduct]:
         product = self.get_by_id(product_id)
         if product:
-            # BUG: Not updating last_updated timestamp
+            changed = False
             for key, value in update_data.items():
                 if value is not None:
-                    setattr(product, key, value)
-            product.last_updated = datetime.now()
+                    if getattr(product, key) != value:
+                        setattr(product, key, value)
+                        changed = True
+            if changed:
+                product.last_updated = datetime.now()
             self._apply_threshold(product)
             return product
         return None
