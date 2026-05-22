@@ -17,7 +17,7 @@ class InMemoryDB:
 
     def _apply_threshold(self, product: Optional[SteelProduct]) -> None:
         if product:
-            product.set_default_inventory_threshold(self.global_inventory_threshold)
+            product.set_global_inventory_threshold(self.global_inventory_threshold)
     
     def _seed_data(self):
         """Add some initial data"""
@@ -175,10 +175,9 @@ class InMemoryDB:
         if product:
             changed = False
             for key, value in update_data.items():
-                if value is not None:
-                    if getattr(product, key) != value:
-                        setattr(product, key, value)
-                        changed = True
+                if value is not None and getattr(product, key) != value:
+                    setattr(product, key, value)
+                    changed = True
             if changed:
                 product.last_updated = datetime.now()
             self._apply_threshold(product)

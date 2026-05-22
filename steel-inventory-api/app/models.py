@@ -22,10 +22,10 @@ class SteelProduct(BaseModel):
     location: str
     quality_grade: QualityGrade = "Standard"
     last_updated: Optional[datetime] = None
-    _default_inventory_threshold: int = PrivateAttr(default=DEFAULT_INVENTORY_THRESHOLD)
+    _global_inventory_threshold: int = PrivateAttr(default=DEFAULT_INVENTORY_THRESHOLD)
 
-    def set_default_inventory_threshold(self, threshold: int) -> "SteelProduct":
-        self._default_inventory_threshold = threshold
+    def set_global_inventory_threshold(self, threshold: int) -> "SteelProduct":
+        self._global_inventory_threshold = threshold
         return self
 
     @computed_field(return_type=bool)
@@ -34,7 +34,7 @@ class SteelProduct(BaseModel):
         return is_low_stock(
             self.quantity,
             self.inventory_threshold,
-            self._default_inventory_threshold,
+            self._global_inventory_threshold,
         )
 
     class Config:
