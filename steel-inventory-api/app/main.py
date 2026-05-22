@@ -22,6 +22,7 @@ app.add_middleware(
 app.include_router(inventory.router)
 app.include_router(calculations.router)
 app.include_router(config.router)
+app.include_router(config.api_router)
 
 # Mount static files for frontend
 static_path = os.path.join(os.path.dirname(__file__), "..", "static")

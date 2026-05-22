@@ -171,6 +171,33 @@ def test_update_global_threshold():
     assert low_stock_response.json()["products"][0]["product_code"] == "THRESH-001"
 
 
+def test_update_global_threshold_via_api_admin_endpoint():
+    replace_inventory([
+        {
+            "product_code": "ADMIN-001",
+            "grade": "A36",
+            "shape": "sheet",
+            "length_mm": 2400,
+            "width_mm": 1200,
+            "thickness_mm": 6.0,
+            "quantity": 60,
+            "location": "Warehouse-A",
+        },
+    ])
+
+    update_response = client.put("/api/config/inventory-threshold", json={"threshold": 75})
+    get_response = client.get("/api/config/inventory-threshold")
+    low_stock_response = client.get("/inventory/low-stock")
+
+    assert update_response.status_code == 200
+    assert update_response.json() == {"threshold": 75}
+    assert get_response.status_code == 200
+    assert get_response.json() == {"threshold": 75}
+    assert low_stock_response.status_code == 200
+    assert low_stock_response.json()["threshold"] == 75
+    assert low_stock_response.json()["count"] == 1
+
+
 def test_update_global_threshold_invalid():
     response = client.put("/config/inventory-threshold", json={"threshold": -1})
 
