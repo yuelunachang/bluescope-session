@@ -217,6 +217,37 @@ def test_is_low_stock_field_on_product_response():
     assert sufficient_response.status_code == 200
     assert sufficient_response.json()["is_low_stock"] is False
 
+
+def test_update_product_can_clear_inventory_threshold_override():
+    replace_inventory([])
+
+    created = client.post(
+        "/inventory/",
+        json={
+            "product_code": "CLEAR-001",
+            "grade": "A36",
+            "shape": "sheet",
+            "length_mm": 2400,
+            "width_mm": 1200,
+            "thickness_mm": 6.0,
+            "quantity": 150,
+            "inventory_threshold": 200,
+            "location": "Warehouse-A",
+        },
+    )
+
+    assert created.status_code == 201
+    assert client.get("/inventory/low-stock").json()["count"] == 1
+
+    updated = client.patch(
+        f"/inventory/{created.json()['id']}",
+        json={"inventory_threshold": None},
+    )
+
+    assert updated.status_code == 200
+    assert updated.json()["inventory_threshold"] is None
+    assert updated.json()["is_low_stock"] is False
+
 # TODO: Add more comprehensive tests:
 # - test_create_product_success
 # - test_create_product_duplicate_code

@@ -33,7 +33,12 @@ if os.path.exists(static_path):
 async def root(request: Request):
     """Serve the frontend web application"""
     static_path = os.path.join(os.path.dirname(__file__), "..", "static", "index.html")
-    if os.path.exists(static_path) and "text/html" in request.headers.get("accept", ""):
+    accepted_media_types = [
+        value.split(";", 1)[0].strip()
+        for value in request.headers.get("accept", "").split(",")
+        if value.strip()
+    ]
+    if os.path.exists(static_path) and "text/html" in accepted_media_types:
         return FileResponse(static_path)
     return {"message": "Welcome to BlueScope Steel Inventory API", "docs": "/docs", "version": "0.1.0"}
 

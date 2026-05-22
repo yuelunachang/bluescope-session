@@ -175,7 +175,10 @@ class InMemoryDB:
         if product:
             changed = False
             for key, value in update_data.items():
-                if value is not None and getattr(product, key) != value:
+                if key == "inventory_threshold" and getattr(product, key) != value:
+                    setattr(product, key, value)
+                    changed = True
+                elif value is not None and getattr(product, key) != value:
                     setattr(product, key, value)
                     changed = True
             if changed:
