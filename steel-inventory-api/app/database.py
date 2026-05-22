@@ -15,10 +15,9 @@ class InMemoryDB:
         self.global_inventory_threshold = DEFAULT_INVENTORY_THRESHOLD
         self._seed_data()
 
-    def _apply_threshold(self, product: Optional[SteelProduct]) -> Optional[SteelProduct]:
+    def _apply_threshold(self, product: Optional[SteelProduct]) -> None:
         if product:
             product.set_default_inventory_threshold(self.global_inventory_threshold)
-        return product
     
     def _seed_data(self):
         """Add some initial data"""
@@ -155,7 +154,8 @@ class InMemoryDB:
     def get_by_id(self, product_id: int) -> Optional[SteelProduct]:
         for product in self.products:
             if product.id == product_id:
-                return self._apply_threshold(product)
+                self._apply_threshold(product)
+                return product
         return None
     
     def create(self, product_data: dict) -> SteelProduct:
@@ -165,7 +165,8 @@ class InMemoryDB:
             **product_data,
             last_updated=datetime.now()
         )
-        self.products.append(self._apply_threshold(product))
+        self._apply_threshold(product)
+        self.products.append(product)
         self._next_id += 1
         return product
     
