@@ -42,6 +42,15 @@ def calculate_area_m2(length_mm: float, width_mm: Optional[float]) -> float:
     area_m2 = area_mm2 / 1_000_000
     return round(area_m2, 2)
 
+
+def is_low_stock(
+    quantity: int,
+    product_threshold: Optional[int],
+    default_threshold: int,
+) -> bool:
+    threshold = product_threshold if product_threshold is not None else default_threshold
+    return quantity < threshold
+
 # TODO: Add functions for:
 # - Inventory value calculation
 # - Reorder point calculation

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.models import SteelProduct, SteelProductCreate, SteelProductUpdate
+from app.models import LowStockResponse, SteelProduct, SteelProductCreate, SteelProductUpdate
 from app.database import db
+from app.utils.steel_utils import is_low_stock
 
 router = APIRouter(
     prefix="/inventory",
@@ -12,6 +13,25 @@ router = APIRouter(
 async def get_all_products():
     """Get all products in inventory"""
     return db.get_all()
+
+
+@router.get("/low-stock", response_model=LowStockResponse)
+async def get_low_stock_products():
+    """Get all products below their effective inventory threshold"""
+    products = [
+        product
+        for product in db.get_all()
+        if is_low_stock(
+            product.quantity,
+            product.inventory_threshold,
+            db.global_inventory_threshold,
+        )
+    ]
+    return {
+        "threshold": db.global_inventory_threshold,
+        "count": len(products),
+        "products": products,
+    }
 
 @router.get("/{product_id}", response_model=SteelProduct)
 async def get_product(product_id: int):
@@ -54,6 +74,5 @@ async def delete_product(product_id: int):
         )
 
 # TODO: Add endpoints for:
-# - Low stock alerts
 # - Search/filter by grade, location, shape
 # - Bulk operations

@@ -2,6 +2,7 @@ const API_BASE = '';
 
 let allProducts = [];
 let editingProductId = null;
+let lowStockFilterActive = false;
 
 // Load products on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,8 +18,8 @@ async function loadProducts() {
         if (!response.ok) throw new Error('Failed to load products');
         
         allProducts = await response.json();
-        displayProducts(allProducts);
         updateStats();
+        filterProducts();
         
         showLoading(false);
     } catch (error) {
@@ -35,11 +36,18 @@ function displayProducts(products) {
         return;
     }
     
-    grid.innerHTML = products.map(product => `
+    grid.innerHTML = products.map(renderProductCard).join('');
+}
+
+function renderProductCard(product) {
+    return `
         <div class="product-card">
             <div class="product-header">
                 <div class="product-code">${product.product_code}</div>
-                <span class="product-badge badge-${product.shape}">${product.shape}</span>
+                <div class="product-badges">
+                    <span class="product-badge badge-${product.shape}">${product.shape}</span>
+                    ${product.is_low_stock ? '<span class="low-stock-badge">⚠ Low Stock</span>' : ''}
+                </div>
             </div>
             
             <div class="product-details">
@@ -56,7 +64,7 @@ function displayProducts(products) {
                 <div class="detail-row">
                     <span class="detail-label">Quantity:</span>
                     <span class="detail-value">
-                        <span class="quantity-badge ${getQuantityClass(product.quantity)}">
+                        <span class="quantity-badge ${getQuantityClass(product)}">
                             ${product.quantity} units
                         </span>
                     </span>
@@ -80,13 +88,13 @@ function displayProducts(products) {
                 </button>
             </div>
         </div>
-    `).join('');
+    `;
 }
 
-function getQuantityClass(quantity) {
-    if (quantity >= 100) return 'quantity-high';
-    if (quantity >= 50) return 'quantity-medium';
-    return 'quantity-low';
+function getQuantityClass(product) {
+    if (product.is_low_stock) return 'quantity-low';
+    if (product.quantity >= 100) return 'quantity-high';
+    return 'quantity-medium';
 }
 
 function formatDate(dateString) {
@@ -106,6 +114,9 @@ function updateStats() {
     
     const grades = new Set(allProducts.map(p => p.grade));
     document.getElementById('gradeCount').textContent = grades.size;
+
+    const lowStockCount = allProducts.filter(product => product.is_low_stock).length;
+    document.getElementById('lowStockCount').textContent = lowStockCount;
 }
 
 function filterProducts() {
@@ -118,8 +129,9 @@ function filterProducts() {
                             product.grade.toLowerCase().includes(searchTerm);
         const matchesShape = !shapeFilter || product.shape === shapeFilter;
         const matchesLocation = !locationFilter || product.location === locationFilter;
+        const matchesLowStock = !lowStockFilterActive || product.is_low_stock === true;
         
-        return matchesSearch && matchesShape && matchesLocation;
+        return matchesSearch && matchesShape && matchesLocation && matchesLowStock;
     });
     
     displayProducts(filtered);
@@ -129,7 +141,19 @@ function clearFilters() {
     document.getElementById('searchInput').value = '';
     document.getElementById('shapeFilter').value = '';
     document.getElementById('locationFilter').value = '';
-    displayProducts(allProducts);
+    lowStockFilterActive = false;
+    updateLowStockFilterState();
+    filterProducts();
+}
+
+function toggleLowStockFilter() {
+    lowStockFilterActive = !lowStockFilterActive;
+    updateLowStockFilterState();
+    filterProducts();
+}
+
+function updateLowStockFilterState() {
+    document.getElementById('lowStockFilter').classList.toggle('active', lowStockFilterActive);
 }
 
 function showAddProductModal() {
